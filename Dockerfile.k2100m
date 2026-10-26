@@ -41,7 +41,8 @@ RUN git clone --branch "${OLLAMA_REF}" "${OLLAMA_REPO}" . && git submodule updat
 # Kepler overlay files (invalidates when patches/scripts change, not on every go build).
 FROM ollama-src AS llama-native
 
-COPY llm/generate/gen_common.sh llm/generate/gen_linux.sh llm/generate/patches/cuda-10.2.patch llm/generate/
+COPY llm/generate/gen_common.sh llm/generate/gen_linux.sh llm/generate/
+COPY llm/generate/patches/cuda-10.2.patch llm/generate/patches/
 
 WORKDIR /src/llm/generate
 RUN bash gen_linux.sh
