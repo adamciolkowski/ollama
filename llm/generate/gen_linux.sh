@@ -39,8 +39,10 @@ amdGPUs() {
 }
 
 echo "Starting linux generate script"
-if [ -z "${CUDACXX}" -a -x /usr/local/cuda/bin/nvcc ]; then
-    export CUDACXX=/usr/local/cuda/bin/nvcc
+CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
+CUDA_LIB_DIR="${CUDA_LIB_DIR:-${CUDA_HOME}/lib64}"
+if [ -z "${CUDACXX}" -a -x "${CUDA_HOME}/bin/nvcc" ]; then
+    export CUDACXX="${CUDA_HOME}/bin/nvcc"
 fi
 COMMON_CMAKE_DEFS="-DCMAKE_POSITION_INDEPENDENT_CODE=on -DLLAMA_NATIVE=off -DLLAMA_AVX=on -DLLAMA_AVX2=off -DLLAMA_AVX512=off -DLLAMA_FMA=off -DLLAMA_F16C=off"
 source $(dirname $0)/gen_common.sh
@@ -60,12 +62,25 @@ install
 # Placeholder to keep go embed happy until we start building dynamic CPU lib variants
 touch ${BUILD_DIR}/lib/dummy.so
 
-if [ -d /usr/local/cuda/lib64/ ]; then
+if [ -d "${CUDA_LIB_DIR}" ]; then
     echo "CUDA libraries detected - building dynamic CUDA library"
     init_vars
-    CMAKE_DEFS="-DLLAMA_CUBLAS=on ${COMMON_CMAKE_DEFS} ${CMAKE_DEFS}"
+    CUDA_CMAKE_DEFS=""
+    if [ "${OLLAMA_CUDA_10_COMPAT:-}" = "1" ]; then
+        CUDA_ARCHITECTURES="${CMAKE_CUDA_ARCHITECTURES:-30}"
+        # CUDA 11 removed compute capability 3.0, so report the mismatch here
+        # rather than letting nvcc fail on an unsupported gpu architecture.
+        CUDA_RELEASE=$("${CUDACXX:-nvcc}" --version | sed -n 's/.*release \([0-9][0-9]*\)\..*/\1/p')
+        if [ "${CUDA_RELEASE}" != "10" ]; then
+            echo "OLLAMA_CUDA_10_COMPAT needs the CUDA 10.x toolkit, found release ${CUDA_RELEASE:-unknown}" >&2
+            exit 1
+        fi
+        # Kepler has no tensor cores, so keep llama.cpp off the fp16 batched
+        # cuBLAS path it selects when tensor cores are assumed available.
+        CUDA_CMAKE_DEFS="-DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHITECTURES} -DLLAMA_CUDA_FORCE_MMQ=on -DCMAKE_CUDA_HOST_COMPILER=${CUDAHOSTCXX:-g++-8}"
+    fi
+    CMAKE_DEFS="-DLLAMA_CUBLAS=on ${CUDA_CMAKE_DEFS} ${COMMON_CMAKE_DEFS} ${CMAKE_DEFS}"
     BUILD_DIR="${LLAMACPP_DIR}/build/linux/cuda"
-    CUDA_LIB_DIR=/usr/local/cuda/lib64
     build
     install
     gcc -fPIC -g -shared -o ${BUILD_DIR}/lib/libext_server.so \

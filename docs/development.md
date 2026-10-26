@@ -54,6 +54,71 @@ Then build the binary:
 go build .
 ```
 
+### Linux CUDA for Quadro K2100M
+
+The Quadro K2100M is a Kepler compute-capability 3.0 GPU. CUDA 10.2 is the
+last toolkit that can compile for it, and NVIDIA's R470 driver branch is the
+last Linux driver family that supports it. Newer CUDA toolkits cannot be made
+compatible by only relaxing Ollama's device check.
+
+This branch is based on Ollama v0.1.18, the final release before Ollama added
+an explicit minimum compute-capability check. Build the pinned CUDA 10.2,
+GCC 8, and `sm_30` configuration with:
+
+```bash
+./scripts/build_k2100m.sh
+```
+
+The resulting binary is `dist/ollama-linux-amd64-k2100m`. Copy it to the
+K2100M Linux host and run it normally:
+
+```bash
+./ollama-linux-amd64-k2100m serve
+```
+
+The host needs a working NVIDIA driver, but it does not need the CUDA toolkit
+used to build Ollama. Verify that the log reports `cuda` rather than the CPU
+fallback. The K2100M usually has 2 GiB of VRAM, so use small quantized models
+and expect only partial layer offload.
+
+To run Ollama in Docker instead, install Docker Engine and NVIDIA Container
+Toolkit on the Linux host, then verify that the GPU is visible in a container:
+
+```bash
+docker run --rm --gpus all nvcr.io/nvidia/cuda:10.2-base-ubuntu18.04 nvidia-smi
+```
+
+Build the runtime image from this repository. The Dockerfile clones
+Ollama `v0.1.18` and `llama.cpp` from GitHub, then overlays the Kepler
+CUDA 10.2 patches from this tree:
+
+```bash
+docker build --platform linux/amd64 \
+  --target runtime \
+  -f Dockerfile.k2100m \
+  -t ollama-k2100m .
+```
+
+Run it with GPU access and persistent model storage:
+
+```bash
+docker run -d \
+  --name ollama-k2100m \
+  --gpus all \
+  --restart unless-stopped \
+  -p 11434:11434 \
+  -v ollama-k2100m:/root/.ollama \
+  ollama-k2100m
+```
+
+CUDA 10.2, GCC, CMake, and Go are used only in the image's build stage. The
+host requires the R470 NVIDIA driver and NVIDIA Container Toolkit, but no CUDA
+Toolkit installation. For example, start with a small model:
+
+```bash
+docker exec -it ollama-k2100m ollama run tinyllama
+```
+
 ### Linux ROCm (AMD)
 *Your operating system distribution may already have packages for AMD ROCm and CLBlast. Distro packages are often preferable, but instructions are distro-specific. Please consult distro-specific docs for dependencies if available!*
 

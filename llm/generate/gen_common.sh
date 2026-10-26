@@ -35,6 +35,17 @@ apply_patches() {
     # Avoid duplicate main symbols when we link into the cgo binary
     sed -e 's/int main(/int __main(/g' <${LLAMACPP_DIR}/examples/server/server.cpp >${LLAMACPP_DIR}/examples/server/server.cpp.tmp &&
         mv ${LLAMACPP_DIR}/examples/server/server.cpp.tmp ${LLAMACPP_DIR}/examples/server/server.cpp
+
+    # CUDA 10.2 predates the cuBLAS compute-type names used by this llama.cpp
+    # revision. Apply aliases only for the legacy K2100M build.
+    if [ "${OLLAMA_CUDA_10_COMPAT:-}" = "1" ]; then
+        if git -C ${LLAMACPP_DIR} apply --check ../generate/patches/cuda-10.2.patch; then
+            git -C ${LLAMACPP_DIR} apply ../generate/patches/cuda-10.2.patch
+        elif ! git -C ${LLAMACPP_DIR} apply --reverse --check ../generate/patches/cuda-10.2.patch; then
+            echo "CUDA 10.2 compatibility patch does not apply cleanly" >&2
+            return 1
+        fi
+    fi
 }
 
 build() {

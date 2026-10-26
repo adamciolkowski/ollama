@@ -1,0 +1,61 @@
+ARG CUDA_IMAGE=nvcr.io/nvidia/cuda:10.2-devel-ubuntu18.04
+ARG CMAKE_VERSION=3.22.1
+ARG GO_VERSION=1.20.14
+ARG OLLAMA_REPO=https://github.com/ollama/ollama.git
+ARG OLLAMA_REF=v0.1.18
+
+FROM --platform=linux/amd64 ${CUDA_IMAGE} AS build
+
+ARG CMAKE_VERSION
+ARG GO_VERSION
+ARG OLLAMA_REPO
+ARG OLLAMA_REF
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gcc-8 g++-8 git && rm -rf /var/lib/apt/lists/*
+
+ADD https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz /tmp/cmake.tar.gz
+RUN tar -xzf /tmp/cmake.tar.gz -C /usr/local --strip-components=1 && rm /tmp/cmake.tar.gz
+
+ADD https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz /tmp/go.tar.gz
+RUN tar -xzf /tmp/go.tar.gz -C /usr/local && rm /tmp/go.tar.gz
+
+ENV PATH=/usr/local/go/bin:${PATH}
+ENV CC=gcc-8
+ENV CXX=g++-8
+ENV CUDAHOSTCXX=g++-8
+ENV OLLAMA_CUDA_10_COMPAT=1
+ENV CMAKE_CUDA_ARCHITECTURES=30
+ENV CGO_ENABLED=1
+
+WORKDIR /src
+RUN git clone --branch "${OLLAMA_REF}" "${OLLAMA_REPO}" . && git submodule update --init llm/llama.cpp
+
+COPY llm/generate/gen_common.sh llm/generate/gen_common.sh
+COPY llm/generate/gen_linux.sh llm/generate/gen_linux.sh
+COPY llm/generate/patches/cuda-10.2.patch llm/generate/patches/cuda-10.2.patch
+
+WORKDIR /src/llm/generate
+RUN bash gen_linux.sh
+WORKDIR /src
+RUN go build -o /out/ollama .
+
+FROM scratch AS artifact
+COPY --from=build /out/ollama /ollama
+
+FROM ubuntu:18.04 AS runtime
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /out/ollama /bin/ollama
+
+ENV OLLAMA_HOST=0.0.0.0
+ENV PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+VOLUME ["/root/.ollama"]
+EXPOSE 11434
+
+ENTRYPOINT ["/bin/ollama"]
+CMD ["serve"]
