@@ -83,18 +83,27 @@ if [ -d "${CUDA_LIB_DIR}" ]; then
     BUILD_DIR="${LLAMACPP_DIR}/build/linux/cuda"
     build
     install
+    if [ "${OLLAMA_CUDA_10_COMPAT:-}" = "1" ]; then
+        # CUDA 10.2 devel images ship cuBLAS as shared libraries only.
+        CUDA_LINK_LIBS="-L${CUDA_LIB_DIR} -Wl,-rpath,\$ORIGIN ${CUDA_LIB_DIR}/libcudart_static.a -lcublas -lcublasLt ${CUDA_LIB_DIR}/libcudadevrt.a"
+    else
+        CUDA_LINK_LIBS="${CUDA_LIB_DIR}/libcudart_static.a ${CUDA_LIB_DIR}/libcublas_static.a ${CUDA_LIB_DIR}/libcublasLt_static.a ${CUDA_LIB_DIR}/libcudadevrt.a ${CUDA_LIB_DIR}/libculibos.a"
+    fi
     gcc -fPIC -g -shared -o ${BUILD_DIR}/lib/libext_server.so \
         -Wl,--whole-archive \
         ${BUILD_DIR}/lib/libext_server.a \
         ${BUILD_DIR}/lib/libcommon.a \
         ${BUILD_DIR}/lib/libllama.a \
         -Wl,--no-whole-archive \
-        ${CUDA_LIB_DIR}/libcudart_static.a \
-        ${CUDA_LIB_DIR}/libcublas_static.a \
-        ${CUDA_LIB_DIR}/libcublasLt_static.a \
-        ${CUDA_LIB_DIR}/libcudadevrt.a \
-        ${CUDA_LIB_DIR}/libculibos.a \
+        ${CUDA_LINK_LIBS} \
         -lrt -lpthread -ldl -lstdc++ -lm
+    if [ "${OLLAMA_CUDA_10_COMPAT:-}" = "1" ]; then
+        shopt -s nullglob
+        for cuda_lib in ${CUDA_LIB_DIR}/libcublas.so* ${CUDA_LIB_DIR}/libcublasLt.so*; do
+            cp -a "${cuda_lib}" ${BUILD_DIR}/lib/
+        done
+        shopt -u nullglob
+    fi
 fi
 
 if [ -z "${ROCM_PATH}" ]; then

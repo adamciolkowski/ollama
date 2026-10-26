@@ -1,15 +1,16 @@
+# syntax=docker/dockerfile:1
+
 ARG CUDA_IMAGE=nvcr.io/nvidia/cuda:10.2-devel-ubuntu18.04
 ARG CMAKE_VERSION=3.22.1
 ARG GO_VERSION=1.20.14
 ARG OLLAMA_REPO=https://github.com/ollama/ollama.git
 ARG OLLAMA_REF=v0.1.18
 
-FROM --platform=linux/amd64 ${CUDA_IMAGE} AS build
+# Toolchain layers change rarely; keep them before any source checkout.
+FROM --platform=linux/amd64 ${CUDA_IMAGE} AS toolchain
 
 ARG CMAKE_VERSION
 ARG GO_VERSION
-ARG OLLAMA_REPO
-ARG OLLAMA_REF
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gcc-8 g++-8 git && rm -rf /var/lib/apt/lists/*
@@ -28,17 +29,28 @@ ENV OLLAMA_CUDA_10_COMPAT=1
 ENV CMAKE_CUDA_ARCHITECTURES=30
 ENV CGO_ENABLED=1
 
+# Upstream Ollama + llama.cpp submodule (invalidates only when OLLAMA_REF/REPO change).
+FROM toolchain AS ollama-src
+
+ARG OLLAMA_REPO
+ARG OLLAMA_REF
+
 WORKDIR /src
 RUN git clone --branch "${OLLAMA_REF}" "${OLLAMA_REPO}" . && git submodule update --init llm/llama.cpp
 
-COPY llm/generate/gen_common.sh llm/generate/gen_common.sh
-COPY llm/generate/gen_linux.sh llm/generate/gen_linux.sh
-COPY llm/generate/patches/cuda-10.2.patch llm/generate/patches/cuda-10.2.patch
+# Kepler overlay files (invalidates when patches/scripts change, not on every go build).
+FROM ollama-src AS llama-native
+
+COPY llm/generate/gen_common.sh llm/generate/gen_linux.sh llm/generate/patches/cuda-10.2.patch llm/generate/
 
 WORKDIR /src/llm/generate
 RUN bash gen_linux.sh
+
+# Go link is fast relative to native builds; keep it in its own layer.
+FROM llama-native AS build
+
 WORKDIR /src
-RUN go build -o /out/ollama .
+RUN mkdir -p /out && go build -o /out/ollama .
 
 FROM scratch AS artifact
 COPY --from=build /out/ollama /ollama
