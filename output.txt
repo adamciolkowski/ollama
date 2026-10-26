@@ -1,0 +1,515 @@
+Sending build context to Docker daemon  72.43MB
+Step 1/45 : ARG CUDA_IMAGE=nvcr.io/nvidia/cuda:10.2-devel-ubuntu18.04
+Step 2/45 : ARG CMAKE_VERSION=3.22.1
+Step 3/45 : ARG GO_VERSION=1.20.14
+Step 4/45 : ARG OLLAMA_REPO=https://github.com/ollama/ollama.git
+Step 5/45 : ARG OLLAMA_REF=v0.1.18
+Step 6/45 : FROM --platform=linux/amd64 ${CUDA_IMAGE} AS build
+ ---> 390597aa19a4
+Step 7/45 : ARG CMAKE_VERSION
+ ---> Using cache
+ ---> 77fea04470d6
+Step 8/45 : ARG GO_VERSION
+ ---> Using cache
+ ---> 477f4c2757ab
+Step 9/45 : ARG OLLAMA_REPO
+ ---> Using cache
+ ---> 13e4a8b37d7d
+Step 10/45 : ARG OLLAMA_REF
+ ---> Using cache
+ ---> a65d7dec9ebd
+Step 11/45 : ENV DEBIAN_FRONTEND=noninteractive
+ ---> Running in 08b3272efcaa
+ ---> Removed intermediate container 08b3272efcaa
+ ---> 4255e0ca91f8
+Step 12/45 : RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gcc-8 g++-8 git && rm -rf /var/lib/apt/lists/*
+ ---> Running in e817c7cb85ec
+Get:1 http://archive.ubuntu.com/ubuntu bionic InRelease [242 kB]
+Get:2 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64  InRelease [1578 B]
+Get:3 http://security.ubuntu.com/ubuntu bionic-security InRelease [102 kB]
+Get:4 http://archive.ubuntu.com/ubuntu bionic-updates InRelease [102 kB]
+Get:5 http://archive.ubuntu.com/ubuntu bionic-backports InRelease [102 kB]
+Get:6 http://archive.ubuntu.com/ubuntu bionic/universe amd64 Packages [11.3 MB]
+Get:7 http://security.ubuntu.com/ubuntu bionic-security/main amd64 Packages [3328 kB]
+Get:8 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64  Packages [1375 kB]
+Get:9 http://archive.ubuntu.com/ubuntu bionic/restricted amd64 Packages [13.5 kB]
+Get:10 http://archive.ubuntu.com/ubuntu bionic/multiverse amd64 Packages [186 kB]
+Get:11 http://archive.ubuntu.com/ubuntu bionic/main amd64 Packages [1344 kB]
+Get:12 http://archive.ubuntu.com/ubuntu bionic-updates/restricted amd64 Packages [1697 kB]
+Get:13 http://security.ubuntu.com/ubuntu bionic-security/restricted amd64 Packages [1658 kB]
+Get:14 http://archive.ubuntu.com/ubuntu bionic-updates/multiverse amd64 Packages [30.5 kB]
+Get:15 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 Packages [3735 kB]
+Get:16 http://security.ubuntu.com/ubuntu bionic-security/universe amd64 Packages [1622 kB]
+Get:17 http://archive.ubuntu.com/ubuntu bionic-updates/universe amd64 Packages [2389 kB]
+Get:18 http://security.ubuntu.com/ubuntu bionic-security/multiverse amd64 Packages [23.5 kB]
+Get:19 http://archive.ubuntu.com/ubuntu bionic-backports/universe amd64 Packages [20.5 kB]
+Get:20 http://archive.ubuntu.com/ubuntu bionic-backports/main amd64 Packages [63.4 kB]
+Fetched 29.4 MB in 5s (5665 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  cpp-8 git-man libasan5 libcurl3-gnutls libcurl4 liberror-perl libexpat1
+  libgcc-8-dev libgssapi-krb5-2 libk5crypto3 libkeyutils1 libkrb5-3
+  libkrb5support0 libnghttp2-14 libpsl5 librtmp1 libstdc++-8-dev libubsan1
+Suggested packages:
+  gcc-8-locales g++-8-multilib gcc-8-doc libstdc++6-8-dbg gcc-8-multilib
+  libgcc1-dbg libgomp1-dbg libitm1-dbg libatomic1-dbg libasan5-dbg
+  liblsan0-dbg libtsan0-dbg libubsan1-dbg libmpx2-dbg libquadmath0-dbg
+  gettext-base git-daemon-run | git-daemon-sysvinit git-doc git-el git-email
+  git-gui gitk gitweb git-cvs git-mediawiki git-svn krb5-doc krb5-user
+  libstdc++-8-doc
+Recommended packages:
+  less ssh-client krb5-locales publicsuffix
+The following NEW packages will be installed:
+  cpp-8 curl g++-8 gcc-8 git git-man libasan5 libcurl3-gnutls libcurl4
+  liberror-perl libexpat1 libgcc-8-dev libgssapi-krb5-2 libk5crypto3
+  libkeyutils1 libkrb5-3 libkrb5support0 libnghttp2-14 libpsl5 librtmp1
+  libstdc++-8-dev libubsan1
+The following packages will be upgraded:
+  ca-certificates
+1 upgraded, 22 newly installed, 0 to remove and 40 not upgraded.
+Need to get 34.1 MB of archives.
+After this operation, 152 MB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 ca-certificates all 20230311ubuntu0.18.04.1 [151 kB]
+Get:2 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libexpat1 amd64 2.2.5-3ubuntu0.9 [82.8 kB]
+Get:3 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libkrb5support0 amd64 1.16-2ubuntu0.4 [30.9 kB]
+Get:4 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libk5crypto3 amd64 1.16-2ubuntu0.4 [85.3 kB]
+Get:5 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libkeyutils1 amd64 1.5.9-9.2ubuntu2.1 [8764 B]
+Get:6 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libkrb5-3 amd64 1.16-2ubuntu0.4 [278 kB]
+Get:7 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libgssapi-krb5-2 amd64 1.16-2ubuntu0.4 [122 kB]
+Get:8 http://archive.ubuntu.com/ubuntu bionic/main amd64 libpsl5 amd64 0.19.1-5build1 [41.8 kB]
+Get:9 http://archive.ubuntu.com/ubuntu bionic-updates/universe amd64 cpp-8 amd64 8.4.0-1ubuntu1~18.04 [7225 kB]
+Get:10 http://archive.ubuntu.com/ubuntu bionic/main amd64 libnghttp2-14 amd64 1.30.0-1ubuntu1 [77.8 kB]
+Get:11 http://archive.ubuntu.com/ubuntu bionic/main amd64 librtmp1 amd64 2.4+20151223.gitfa8646d.1-1 [54.2 kB]
+Get:12 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libcurl4 amd64 7.58.0-2ubuntu3.24 [221 kB]
+Get:13 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 curl amd64 7.58.0-2ubuntu3.24 [159 kB]
+Get:14 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libasan5 amd64 8.4.0-1ubuntu1~18.04 [366 kB]
+Get:15 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libubsan1 amd64 8.4.0-1ubuntu1~18.04 [122 kB]
+Get:16 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libgcc-8-dev amd64 8.4.0-1ubuntu1~18.04 [2305 kB]
+Get:17 http://archive.ubuntu.com/ubuntu bionic-updates/universe amd64 gcc-8 amd64 8.4.0-1ubuntu1~18.04 [8044 kB]
+Get:18 http://archive.ubuntu.com/ubuntu bionic-updates/universe amd64 libstdc++-8-dev amd64 8.4.0-1ubuntu1~18.04 [1534 kB]
+Get:19 http://archive.ubuntu.com/ubuntu bionic-updates/universe amd64 g++-8 amd64 8.4.0-1ubuntu1~18.04 [8122 kB]
+Get:20 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libcurl3-gnutls amd64 7.58.0-2ubuntu3.24 [219 kB]
+Get:21 http://archive.ubuntu.com/ubuntu bionic/main amd64 liberror-perl all 0.17025-1 [22.8 kB]
+Get:22 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 git-man all 1:2.17.1-1ubuntu0.18 [804 kB]
+Get:23 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 git amd64 1:2.17.1-1ubuntu0.18 [3990 kB]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 34.1 MB in 6s (5432 kB/s)
+(Reading database ... 12297 files and directories currently installed.)
+Preparing to unpack .../00-ca-certificates_20230311ubuntu0.18.04.1_all.deb ...
+Unpacking ca-certificates (20230311ubuntu0.18.04.1) over (20211016ubuntu0.18.04.1) ...
+Selecting previously unselected package libexpat1:amd64.
+Preparing to unpack .../01-libexpat1_2.2.5-3ubuntu0.9_amd64.deb ...
+Unpacking libexpat1:amd64 (2.2.5-3ubuntu0.9) ...
+Selecting previously unselected package libkrb5support0:amd64.
+Preparing to unpack .../02-libkrb5support0_1.16-2ubuntu0.4_amd64.deb ...
+Unpacking libkrb5support0:amd64 (1.16-2ubuntu0.4) ...
+Selecting previously unselected package libk5crypto3:amd64.
+Preparing to unpack .../03-libk5crypto3_1.16-2ubuntu0.4_amd64.deb ...
+Unpacking libk5crypto3:amd64 (1.16-2ubuntu0.4) ...
+Selecting previously unselected package libkeyutils1:amd64.
+Preparing to unpack .../04-libkeyutils1_1.5.9-9.2ubuntu2.1_amd64.deb ...
+Unpacking libkeyutils1:amd64 (1.5.9-9.2ubuntu2.1) ...
+Selecting previously unselected package libkrb5-3:amd64.
+Preparing to unpack .../05-libkrb5-3_1.16-2ubuntu0.4_amd64.deb ...
+Unpacking libkrb5-3:amd64 (1.16-2ubuntu0.4) ...
+Selecting previously unselected package libgssapi-krb5-2:amd64.
+Preparing to unpack .../06-libgssapi-krb5-2_1.16-2ubuntu0.4_amd64.deb ...
+Unpacking libgssapi-krb5-2:amd64 (1.16-2ubuntu0.4) ...
+Selecting previously unselected package libpsl5:amd64.
+Preparing to unpack .../07-libpsl5_0.19.1-5build1_amd64.deb ...
+Unpacking libpsl5:amd64 (0.19.1-5build1) ...
+Selecting previously unselected package cpp-8.
+Preparing to unpack .../08-cpp-8_8.4.0-1ubuntu1~18.04_amd64.deb ...
+Unpacking cpp-8 (8.4.0-1ubuntu1~18.04) ...
+Selecting previously unselected package libnghttp2-14:amd64.
+Preparing to unpack .../09-libnghttp2-14_1.30.0-1ubuntu1_amd64.deb ...
+Unpacking libnghttp2-14:amd64 (1.30.0-1ubuntu1) ...
+Selecting previously unselected package librtmp1:amd64.
+Preparing to unpack .../10-librtmp1_2.4+20151223.gitfa8646d.1-1_amd64.deb ...
+Unpacking librtmp1:amd64 (2.4+20151223.gitfa8646d.1-1) ...
+Selecting previously unselected package libcurl4:amd64.
+Preparing to unpack .../11-libcurl4_7.58.0-2ubuntu3.24_amd64.deb ...
+Unpacking libcurl4:amd64 (7.58.0-2ubuntu3.24) ...
+Selecting previously unselected package curl.
+Preparing to unpack .../12-curl_7.58.0-2ubuntu3.24_amd64.deb ...
+Unpacking curl (7.58.0-2ubuntu3.24) ...
+Selecting previously unselected package libasan5:amd64.
+Preparing to unpack .../13-libasan5_8.4.0-1ubuntu1~18.04_amd64.deb ...
+Unpacking libasan5:amd64 (8.4.0-1ubuntu1~18.04) ...
+Selecting previously unselected package libubsan1:amd64.
+Preparing to unpack .../14-libubsan1_8.4.0-1ubuntu1~18.04_amd64.deb ...
+Unpacking libubsan1:amd64 (8.4.0-1ubuntu1~18.04) ...
+Selecting previously unselected package libgcc-8-dev:amd64.
+Preparing to unpack .../15-libgcc-8-dev_8.4.0-1ubuntu1~18.04_amd64.deb ...
+Unpacking libgcc-8-dev:amd64 (8.4.0-1ubuntu1~18.04) ...
+Selecting previously unselected package gcc-8.
+Preparing to unpack .../16-gcc-8_8.4.0-1ubuntu1~18.04_amd64.deb ...
+Unpacking gcc-8 (8.4.0-1ubuntu1~18.04) ...
+Selecting previously unselected package libstdc++-8-dev:amd64.
+Preparing to unpack .../17-libstdc++-8-dev_8.4.0-1ubuntu1~18.04_amd64.deb ...
+Unpacking libstdc++-8-dev:amd64 (8.4.0-1ubuntu1~18.04) ...
+Selecting previously unselected package g++-8.
+Preparing to unpack .../18-g++-8_8.4.0-1ubuntu1~18.04_amd64.deb ...
+Unpacking g++-8 (8.4.0-1ubuntu1~18.04) ...
+Selecting previously unselected package libcurl3-gnutls:amd64.
+Preparing to unpack .../19-libcurl3-gnutls_7.58.0-2ubuntu3.24_amd64.deb ...
+Unpacking libcurl3-gnutls:amd64 (7.58.0-2ubuntu3.24) ...
+Selecting previously unselected package liberror-perl.
+Preparing to unpack .../20-liberror-perl_0.17025-1_all.deb ...
+Unpacking liberror-perl (0.17025-1) ...
+Selecting previously unselected package git-man.
+Preparing to unpack .../21-git-man_1%3a2.17.1-1ubuntu0.18_all.deb ...
+Unpacking git-man (1:2.17.1-1ubuntu0.18) ...
+Selecting previously unselected package git.
+Preparing to unpack .../22-git_1%3a2.17.1-1ubuntu0.18_amd64.deb ...
+Unpacking git (1:2.17.1-1ubuntu0.18) ...
+Setting up cpp-8 (8.4.0-1ubuntu1~18.04) ...
+Setting up git-man (1:2.17.1-1ubuntu0.18) ...
+Setting up libexpat1:amd64 (2.2.5-3ubuntu0.9) ...
+Setting up libnghttp2-14:amd64 (1.30.0-1ubuntu1) ...
+Setting up liberror-perl (0.17025-1) ...
+Setting up libpsl5:amd64 (0.19.1-5build1) ...
+Setting up librtmp1:amd64 (2.4+20151223.gitfa8646d.1-1) ...
+Setting up libkrb5support0:amd64 (1.16-2ubuntu0.4) ...
+Setting up libkeyutils1:amd64 (1.5.9-9.2ubuntu2.1) ...
+Setting up ca-certificates (20230311ubuntu0.18.04.1) ...
+Updating certificates in /etc/ssl/certs...
+rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+19 added, 6 removed; done.
+Setting up libasan5:amd64 (8.4.0-1ubuntu1~18.04) ...
+Setting up libubsan1:amd64 (8.4.0-1ubuntu1~18.04) ...
+Setting up libk5crypto3:amd64 (1.16-2ubuntu0.4) ...
+Setting up libgcc-8-dev:amd64 (8.4.0-1ubuntu1~18.04) ...
+Setting up libkrb5-3:amd64 (1.16-2ubuntu0.4) ...
+Setting up libstdc++-8-dev:amd64 (8.4.0-1ubuntu1~18.04) ...
+Setting up gcc-8 (8.4.0-1ubuntu1~18.04) ...
+Setting up libgssapi-krb5-2:amd64 (1.16-2ubuntu0.4) ...
+Setting up g++-8 (8.4.0-1ubuntu1~18.04) ...
+Setting up libcurl3-gnutls:amd64 (7.58.0-2ubuntu3.24) ...
+Setting up libcurl4:amd64 (7.58.0-2ubuntu3.24) ...
+Setting up git (1:2.17.1-1ubuntu0.18) ...
+Setting up curl (7.58.0-2ubuntu3.24) ...
+Processing triggers for libc-bin (2.27-3ubuntu1.6) ...
+Processing triggers for ca-certificates (20230311ubuntu0.18.04.1) ...
+Updating certificates in /etc/ssl/certs...
+0 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+done.
+ ---> Removed intermediate container e817c7cb85ec
+ ---> 975f9fd863c2
+Step 13/45 : ADD https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz /tmp/cmake.tar.gz
+
+
+ ---> 8b3ffd4b2f06
+Step 14/45 : RUN tar -xzf /tmp/cmake.tar.gz -C /usr/local --strip-components=1 && rm /tmp/cmake.tar.gz
+ ---> Running in 3e6e5d91077d
+ ---> Removed intermediate container 3e6e5d91077d
+ ---> 9caf30bab2dc
+Step 15/45 : ADD https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz /tmp/go.tar.gz
+
+
+ ---> d3fc374ed1fe
+Step 16/45 : RUN tar -xzf /tmp/go.tar.gz -C /usr/local && rm /tmp/go.tar.gz
+ ---> Running in 22a5dbb9f870
+ ---> Removed intermediate container 22a5dbb9f870
+ ---> 7f07e3f7ac1d
+Step 17/45 : ENV PATH=/usr/local/go/bin:${PATH}
+ ---> Running in 890d4fc05c9d
+ ---> Removed intermediate container 890d4fc05c9d
+ ---> 1443f28916bc
+Step 18/45 : ENV CC=gcc-8
+ ---> Running in 30db1e6f0e5d
+ ---> Removed intermediate container 30db1e6f0e5d
+ ---> 0054ea9a9a56
+Step 19/45 : ENV CXX=g++-8
+ ---> Running in 7aa045b2ec9a
+ ---> Removed intermediate container 7aa045b2ec9a
+ ---> 657d1970e42b
+Step 20/45 : ENV CUDAHOSTCXX=g++-8
+ ---> Running in 429138faf1a4
+ ---> Removed intermediate container 429138faf1a4
+ ---> 8d4fee33f75b
+Step 21/45 : ENV OLLAMA_CUDA_10_COMPAT=1
+ ---> Running in cf8b1ea54558
+ ---> Removed intermediate container cf8b1ea54558
+ ---> e95c453784f4
+Step 22/45 : ENV CMAKE_CUDA_ARCHITECTURES=30
+ ---> Running in 738a45094cca
+ ---> Removed intermediate container 738a45094cca
+ ---> 51b8f310c588
+Step 23/45 : ENV CGO_ENABLED=1
+ ---> Running in 706612ef7da1
+ ---> Removed intermediate container 706612ef7da1
+ ---> 8f496fe05bf8
+Step 24/45 : WORKDIR /src
+ ---> Running in 888e9bada540
+ ---> Removed intermediate container 888e9bada540
+ ---> ea93fcf81985
+Step 25/45 : RUN git clone --branch "${OLLAMA_REF}" "${OLLAMA_REPO}" . && git submodule update --init llm/llama.cpp
+ ---> Running in 3dfe8b055a31
+Cloning into '.'...
+Note: checking out '3a9f4471412cf132f0fa7b872cb4f616a1dd8b59'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by performing another checkout.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -b with the checkout command again. Example:
+
+  git checkout -b <new-branch-name>
+
+Submodule 'llama.cpp' (https://github.com/ggerganov/llama.cpp.git) registered for path 'llm/llama.cpp'
+Cloning into '/src/llm/llama.cpp'...
+From https://github.com/ggerganov/llama.cpp
+ * branch            328b83de23b33240e28f4e74900d1d06726f5eb1 -> FETCH_HEAD
+Submodule path 'llm/llama.cpp': checked out '328b83de23b33240e28f4e74900d1d06726f5eb1'
+ ---> Removed intermediate container 3dfe8b055a31
+ ---> aa3d0863fd99
+Step 26/45 : COPY llm/generate/gen_common.sh llm/generate/gen_common.sh
+ ---> d8408f3f6c81
+Step 27/45 : COPY llm/generate/gen_linux.sh llm/generate/gen_linux.sh
+ ---> 2f747908a359
+Step 28/45 : COPY llm/generate/patches/cuda-10.2.patch llm/generate/patches/cuda-10.2.patch
+ ---> 8b20215d4c96
+Step 29/45 : WORKDIR /src/llm/generate
+ ---> Running in 81715d9e01d4
+ ---> Removed intermediate container 81715d9e01d4
+ ---> b9336a7a150e
+Step 30/45 : RUN bash gen_linux.sh
+ ---> Running in 5413f25b0e1a
++ set -o pipefail
++ echo 'Starting linux generate script'
++ CUDA_HOME=/usr/local/cuda
+Starting linux generate script
++ CUDA_LIB_DIR=/usr/local/cuda/lib64
++ '[' -z '' -a -x /usr/local/cuda/bin/nvcc ']'
++ export CUDACXX=/usr/local/cuda/bin/nvcc
++ CUDACXX=/usr/local/cuda/bin/nvcc
++ COMMON_CMAKE_DEFS='-DCMAKE_POSITION_INDEPENDENT_CODE=on -DLLAMA_NATIVE=off -DLLAMA_AVX=on -DLLAMA_AVX2=off -DLLAMA_AVX512=off -DLLAMA_FMA=off -DLLAMA_F16C=off'
+++ dirname gen_linux.sh
++ source ./gen_common.sh
++ init_vars
++ LLAMACPP_DIR=../llama.cpp
++ CMAKE_DEFS=
++ CMAKE_TARGETS='--target ggml --target ggml_static --target llama --target build_info --target common --target ext_server --target llava_static'
++ echo ''
++ grep -- -g
++ CMAKE_DEFS='-DCMAKE_BUILD_TYPE=Release -DLLAMA_SERVER_VERBOSE=off'
++ git_module_setup
++ '[' -n '' ']'
++ '[' -d ../llama.cpp/gguf ']'
++ git submodule init
++ git submodule update --force ../llama.cpp
+Submodule path '../llama.cpp': checked out '328b83de23b33240e28f4e74900d1d06726f5eb1'
++ apply_patches
++ grep ollama ../llama.cpp/examples/server/CMakeLists.txt
++ echo 'include (../../../ext_server/CMakeLists.txt) # ollama'
++ sed -e 's/int main(/int __main(/g'
++ mv ../llama.cpp/examples/server/server.cpp.tmp ../llama.cpp/examples/server/server.cpp
++ '[' 1 = 1 ']'
++ git -C ../llama.cpp apply --check ../generate/patches/cuda-10.2.patch
++ git -C ../llama.cpp apply ../generate/patches/cuda-10.2.patch
++ CMAKE_DEFS='-DCMAKE_POSITION_INDEPENDENT_CODE=on -DLLAMA_NATIVE=off -DLLAMA_AVX=on -DLLAMA_AVX2=off -DLLAMA_AVX512=off -DLLAMA_FMA=off -DLLAMA_F16C=off -DCMAKE_BUILD_TYPE=Release -DLLAMA_SERVER_VERBOSE=off'
++ BUILD_DIR=../llama.cpp/build/linux/cpu
++ build
++ cmake -S ../llama.cpp -B ../llama.cpp/build/linux/cpu -DCMAKE_POSITION_INDEPENDENT_CODE=on -DLLAMA_NATIVE=off -DLLAMA_AVX=on -DLLAMA_AVX2=off -DLLAMA_AVX512=off -DLLAMA_FMA=off -DLLAMA_F16C=off -DCMAKE_BUILD_TYPE=Release -DLLAMA_SERVER_VERBOSE=off
+-- The C compiler identification is GNU 8.4.0
+-- The CXX compiler identification is GNU 8.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/gcc-8 - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/g++-8 - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found Git: /usr/bin/git (found version "2.17.1") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Check if compiler accepts -pthread
+-- Check if compiler accepts -pthread - yes
+-- Found Threads: TRUE  
+-- CMAKE_SYSTEM_PROCESSOR: x86_64
+-- x86 detected
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /src/llm/llama.cpp/build/linux/cpu
++ cmake --build ../llama.cpp/build/linux/cpu --target ggml --target ggml_static --target llama --target build_info --target common --target ext_server --target llava_static -j8
+[ 25%] Building C object CMakeFiles/ggml.dir/ggml.c.o
+[ 50%] Building C object CMakeFiles/ggml.dir/ggml-alloc.c.o
+[ 75%] Building C object CMakeFiles/ggml.dir/ggml-backend.c.o
+[100%] Building C object CMakeFiles/ggml.dir/ggml-quants.c.o
+[100%] Built target ggml
+Consolidate compiler generated dependencies of target ggml
+[ 80%] Built target ggml
+[100%] Linking C static library libggml_static.a
+[100%] Built target ggml_static
+[ 66%] Built target ggml
+[ 83%] Building CXX object CMakeFiles/llama.dir/llama.cpp.o
+[100%] Linking CXX static library libllama.a
+[100%] Built target llama
+[ 50%] Generating build details from Git
+-- Found Git: /usr/bin/git (found version "2.17.1") 
+[100%] Building CXX object common/CMakeFiles/build_info.dir/build-info.cpp.o
+[100%] Built target build_info
+Consolidate compiler generated dependencies of target build_info
+[ 14%] Built target build_info
+[ 42%] Built target ggml
+Consolidate compiler generated dependencies of target llama
+[ 57%] Built target llama
+[ 64%] Building CXX object common/CMakeFiles/common.dir/common.cpp.o
+[ 71%] Building CXX object common/CMakeFiles/common.dir/console.cpp.o
+[ 85%] Building CXX object common/CMakeFiles/common.dir/grammar-parser.cpp.o
+[ 85%] Building CXX object common/CMakeFiles/common.dir/sampling.cpp.o
+[ 92%] Building CXX object common/CMakeFiles/common.dir/train.cpp.o
+[100%] Linking CXX static library libcommon.a
+[100%] Built target common
+[ 11%] Built target build_info
+[ 33%] Built target ggml
+[ 44%] Built target llama
+[ 55%] Building CXX object examples/llava/CMakeFiles/llava.dir/llava.cpp.o
+[ 55%] Building CXX object examples/llava/CMakeFiles/llava.dir/clip.cpp.o
+Consolidate compiler generated dependencies of target common
+[ 88%] Built target common
+[ 88%] Built target llava
+[ 94%] Building CXX object examples/server/CMakeFiles/ext_server.dir/src/llm/ext_server/ext_server.cpp.o
+[100%] Linking CXX static library libext_server.a
+[100%] Built target ext_server
+[ 44%] Built target ggml
+[ 66%] Built target llama
+Consolidate compiler generated dependencies of target llava
+[ 88%] Built target llava
+[100%] Linking CXX static library libllava_static.a
+[100%] Built target llava_static
++ install
++ rm -rf ../llama.cpp/build/linux/cpu/lib
++ mkdir -p ../llama.cpp/build/linux/cpu/lib
++ cp ../llama.cpp/build/linux/cpu/examples/server/libext_server.a ../llama.cpp/build/linux/cpu/lib
++ cp ../llama.cpp/build/linux/cpu/common/libcommon.a ../llama.cpp/build/linux/cpu/lib
++ cp ../llama.cpp/build/linux/cpu/libllama.a ../llama.cpp/build/linux/cpu/lib
++ cp ../llama.cpp/build/linux/cpu/libggml_static.a ../llama.cpp/build/linux/cpu/lib
++ touch ../llama.cpp/build/linux/cpu/lib/dummy.so
++ '[' -d /usr/local/cuda/lib64 ']'
++ echo 'CUDA libraries detected - building dynamic CUDA library'
++ init_vars
++ LLAMACPP_DIR=../llama.cpp
++ CMAKE_DEFS=
++ CMAKE_TARGETS='--target ggml --target ggml_static --target llama --target build_info --target common --target ext_server --target llava_static'
+CUDA libraries detected - building dynamic CUDA library
++ echo ''
++ grep -- -g
++ CMAKE_DEFS='-DCMAKE_BUILD_TYPE=Release -DLLAMA_SERVER_VERBOSE=off'
++ CUDA_CMAKE_DEFS=
++ '[' 1 = 1 ']'
++ CUDA_ARCHITECTURES=30
+++ /usr/local/cuda/bin/nvcc --version
+++ sed -n 's/.*release \([0-9][0-9]*\)\..*/\1/p'
++ CUDA_RELEASE=10
++ '[' 10 '!=' 10 ']'
++ CUDA_CMAKE_DEFS='-DCMAKE_CUDA_ARCHITECTURES=30 -DLLAMA_CUDA_FORCE_MMQ=on -DCMAKE_CUDA_HOST_COMPILER=g++-8'
++ CMAKE_DEFS='-DLLAMA_CUBLAS=on -DCMAKE_CUDA_ARCHITECTURES=30 -DLLAMA_CUDA_FORCE_MMQ=on -DCMAKE_CUDA_HOST_COMPILER=g++-8 -DCMAKE_POSITION_INDEPENDENT_CODE=on -DLLAMA_NATIVE=off -DLLAMA_AVX=on -DLLAMA_AVX2=off -DLLAMA_AVX512=off -DLLAMA_FMA=off -DLLAMA_F16C=off -DCMAKE_BUILD_TYPE=Release -DLLAMA_SERVER_VERBOSE=off'
++ BUILD_DIR=../llama.cpp/build/linux/cuda
++ build
++ cmake -S ../llama.cpp -B ../llama.cpp/build/linux/cuda -DLLAMA_CUBLAS=on -DCMAKE_CUDA_ARCHITECTURES=30 -DLLAMA_CUDA_FORCE_MMQ=on -DCMAKE_CUDA_HOST_COMPILER=g++-8 -DCMAKE_POSITION_INDEPENDENT_CODE=on -DLLAMA_NATIVE=off -DLLAMA_AVX=on -DLLAMA_AVX2=off -DLLAMA_AVX512=off -DLLAMA_FMA=off -DLLAMA_F16C=off -DCMAKE_BUILD_TYPE=Release -DLLAMA_SERVER_VERBOSE=off
+-- The C compiler identification is GNU 8.4.0
+-- The CXX compiler identification is GNU 8.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/gcc-8 - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/g++-8 - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found Git: /usr/bin/git (found version "2.17.1") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Check if compiler accepts -pthread
+-- Check if compiler accepts -pthread - yes
+-- Found Threads: TRUE  
+-- Unable to find cublas_v2.h in either "/usr/local/cuda/include" or "/usr/math_libs/include"
+-- Found CUDAToolkit: /usr/local/cuda/include (found version "10.2.89") 
+-- cuBLAS found
+-- The CUDA compiler identification is NVIDIA 10.2.89
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /usr/local/cuda/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Using CUDA architectures: 30
+-- CUDA host compiler is GNU 8.4.0
+
+-- CMAKE_SYSTEM_PROCESSOR: x86_64
+-- x86 detected
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /src/llm/llama.cpp/build/linux/cuda
++ cmake --build ../llama.cpp/build/linux/cuda --target ggml --target ggml_static --target llama --target build_info --target common --target ext_server --target llava_static -j8
+[ 60%] Building C object CMakeFiles/ggml.dir/ggml-backend.c.o
+[ 60%] Building C object CMakeFiles/ggml.dir/ggml-alloc.c.o
+[ 60%] Building C object CMakeFiles/ggml.dir/ggml.c.o
+[ 80%] Building CUDA object CMakeFiles/ggml.dir/ggml-cuda.cu.o
+[100%] Building C object CMakeFiles/ggml.dir/ggml-quants.c.o
+[100%] Built target ggml
+Consolidate compiler generated dependencies of target ggml
+[ 83%] Built target ggml
+[100%] Linking CUDA static library libggml_static.a
+[100%] Built target ggml_static
+[ 71%] Built target ggml
+[ 85%] Building CXX object CMakeFiles/llama.dir/llama.cpp.o
+[100%] Linking CXX static library libllama.a
+[100%] Built target llama
+[ 50%] Building CXX object common/CMakeFiles/build_info.dir/build-info.cpp.o
+[100%] Built target build_info
+Consolidate compiler generated dependencies of target build_info
+[ 13%] Built target build_info
+[ 46%] Built target ggml
+Consolidate compiler generated dependencies of target llama
+[ 60%] Built target llama
+[ 66%] Building CXX object common/CMakeFiles/common.dir/sampling.cpp.o
+[ 73%] Building CXX object common/CMakeFiles/common.dir/common.cpp.o
+[ 80%] Building CXX object common/CMakeFiles/common.dir/console.cpp.o
+[ 86%] Building CXX object common/CMakeFiles/common.dir/train.cpp.o
+[ 93%] Building CXX object common/CMakeFiles/common.dir/grammar-parser.cpp.o
+[100%] Linking CXX static library libcommon.a
+[100%] Built target common
+[ 10%] Built target build_info
+[ 36%] Built target ggml
+[ 47%] Built target llama
+[ 52%] Building CXX object examples/llava/CMakeFiles/llava.dir/llava.cpp.o
+[ 57%] Building CXX object examples/llava/CMakeFiles/llava.dir/clip.cpp.o
+Consolidate compiler generated dependencies of target common
+[ 89%] Built target common
+[ 89%] Built target llava
+[ 94%] Building CXX object examples/server/CMakeFiles/ext_server.dir/src/llm/ext_server/ext_server.cpp.o
+[100%] Linking CXX static library libext_server.a
+[100%] Built target ext_server
+[ 50%] Built target ggml
+[ 70%] Built target llama
+Consolidate compiler generated dependencies of target llava
+[ 90%] Built target llava
+[100%] Linking CXX static library libllava_static.a
+[100%] Built target llava_static
++ install
++ rm -rf ../llama.cpp/build/linux/cuda/lib
++ mkdir -p ../llama.cpp/build/linux/cuda/lib
++ cp ../llama.cpp/build/linux/cuda/examples/server/libext_server.a ../llama.cpp/build/linux/cuda/lib
++ cp ../llama.cpp/build/linux/cuda/common/libcommon.a ../llama.cpp/build/linux/cuda/lib
++ cp ../llama.cpp/build/linux/cuda/libllama.a ../llama.cpp/build/linux/cuda/lib
++ cp ../llama.cpp/build/linux/cuda/libggml_static.a ../llama.cpp/build/linux/cuda/lib
++ gcc -fPIC -g -shared -o ../llama.cpp/build/linux/cuda/lib/libext_server.so -Wl,--whole-archive ../llama.cpp/build/linux/cuda/lib/libext_server.a ../llama.cpp/build/linux/cuda/lib/libcommon.a ../llama.cpp/build/linux/cuda/lib/libllama.a -Wl,--no-whole-archive /usr/local/cuda/lib64/libcudart_static.a /usr/local/cuda/lib64/libcublas_static.a /usr/local/cuda/lib64/libcublasLt_static.a /usr/local/cuda/lib64/libcudadevrt.a /usr/local/cuda/lib64/libculibos.a -lrt -lpthread -ldl -lstdc++ -lm
+gcc: error: /usr/local/cuda/lib64/libcublas_static.a: No such file or directory
+gcc: error: /usr/local/cuda/lib64/libcublasLt_static.a: No such file or directory
+The command '/bin/sh -c bash gen_linux.sh' returned a non-zero code: 1
