@@ -1,0 +1,6 @@
+2026/10/26 20:42:16 routes.go:929: Listening on [::]:11434 (version 0.0.0)
+2026/10/26 20:42:16 shim_ext_server.go:142: Dynamic LLM variants [cuda]
+2026/10/26 20:42:16 gpu.go:34: Detecting GPU type
+2026/10/26 20:42:16 gpu.go:39: CUDA not detected: Unable to load libnvidia-ml.so library to query for Nvidia GPUs: /usr/lib/wsl/lib/libnvidia-ml.so.1: cannot open shared object file: No such file or directory
+2026/10/26 20:42:16 gpu.go:45: ROCm not detected: Unable to load librocm_smi64.so library to query for Radeon GPUs: /opt/rocm/lib/librocm_smi64.so: cannot open shared object file: No such file or directory
+2026/10/26 20:42:16 routes.go:952: no GPU detected
