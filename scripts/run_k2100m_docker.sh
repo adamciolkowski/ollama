@@ -7,6 +7,12 @@
 
 set -eu
 
+if ! docker run --rm --gpus all nvcr.io/nvidia/cuda:10.2-base-ubuntu18.04 nvidia-smi >/dev/null 2>&1; then
+  echo "GPU not visible in Docker. Install NVIDIA Container Toolkit, restart Docker," >&2
+  echo "then verify: docker run --rm --gpus all nvcr.io/nvidia/cuda:10.2-base-ubuntu18.04 nvidia-smi" >&2
+  exit 1
+fi
+
 IMAGE=${IMAGE:-ollama-k2100m}
 NAME=${NAME:-ollama-k2100m}
 VOLUME=${VOLUME:-ollama-k2100m}

@@ -50,6 +50,8 @@ RUN bash gen_linux.sh
 # Go link is fast relative to native builds; keep it in its own layer.
 FROM llama-native AS build
 
+COPY gpu/gpu_info_cuda.c gpu/gpu_info_cuda.c
+
 WORKDIR /src
 RUN mkdir -p /out && go build -o /out/ollama .
 
@@ -65,6 +67,7 @@ COPY --from=build /out/ollama /bin/ollama
 ENV OLLAMA_HOST=0.0.0.0
 ENV PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
 VOLUME ["/root/.ollama"]

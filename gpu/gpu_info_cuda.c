@@ -6,10 +6,16 @@
 
 #ifndef _WIN32
 const char *cuda_lib_paths[] = {
+    // NVIDIA Container Toolkit bind-mounts driver libs here.
+    "/usr/local/nvidia/lib64/libnvidia-ml.so.1",
+    "/usr/local/nvidia/lib/libnvidia-ml.so.1",
+    "libnvidia-ml.so.1",
     "libnvidia-ml.so",
+    "/usr/local/cuda/lib64/libnvidia-ml.so.1",
     "/usr/local/cuda/lib64/libnvidia-ml.so",
+    "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1",
     "/usr/lib/x86_64-linux-gnu/nvidia/current/libnvidia-ml.so",
-    "/usr/lib/wsl/lib/libnvidia-ml.so.1",  // TODO Maybe glob?
+    "/usr/lib/wsl/lib/libnvidia-ml.so.1",
     NULL,
 };
 #else
