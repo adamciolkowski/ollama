@@ -99,7 +99,15 @@ docker build --platform linux/amd64 \
   -t ollama-k2100m .
 ```
 
-Run it with GPU access and persistent model storage:
+Run it with GPU access and persistent model storage. The `-v` flag is required;
+the image name `ollama-k2100m` must be last. Putting `ollama-k2100m:/root/.ollama`
+after the image without `-v` makes Ollama report an unknown command.
+
+```bash
+./scripts/run_k2100m_docker.sh
+```
+
+Or manually:
 
 ```bash
 docker run -d \
@@ -113,10 +121,15 @@ docker run -d \
 
 CUDA 10.2, GCC, CMake, and Go are used only in the image's build stage. The
 host requires the R470 NVIDIA driver and NVIDIA Container Toolkit, but no CUDA
-Toolkit installation. For example, start with a small model:
+Toolkit installation.
+
+Check logs for `Nvidia GPU detected` and `cuda` in `Dynamic LLM variants`, then
+try a small model:
 
 ```bash
-docker exec -it ollama-k2100m ollama run tinyllama
+docker logs -f ollama-k2100m
+docker exec -it ollama-k2100m ollama pull tinyllama
+docker exec -it ollama-k2100m ollama run tinyllama "Say hello in one sentence."
 ```
 
 ### Linux ROCm (AMD)
