@@ -85,6 +85,10 @@ func GetGPUInfo() GpuInfo {
 		}
 	}
 	if resp.Library == "" {
+		if info, ok := cudaInfoWithoutNVML(); ok {
+			log.Printf("Using CUDA without NVML (%d MB VRAM for layer offload)", info.FreeMemory/(1024*1024))
+			return info
+		}
 		C.cpu_check_ram(&memInfo)
 		// In the future we may offer multiple CPU variants to tune CPU features
 		if runtime.GOOS == "windows" {

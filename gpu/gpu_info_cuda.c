@@ -63,18 +63,21 @@ void cuda_init(cuda_init_resp_t *resp) {
     return;
   }
 
-  for (i = 0; i < CUDA_LOOKUP_SIZE; i++) {  // TODO - fix this to use a null terminated list
+  for (i = 0; i < CUDA_LOOKUP_SIZE; i++) {
     *l[i].p = LOAD_SYMBOL(resp->ch.handle, l[i].s);
-    if (!l[i].p) {
-      UNLOAD_LIBRARY(resp->ch.handle);
-      resp->ch.handle = NULL;
-      char *msg = LOAD_ERR();
-      snprintf(buf, buflen, "symbol lookup for %s failed: %s", l[i].s,
-               msg);
-      free(msg);
-      resp->err = strdup(buf);
-      return;
-    }
+  }
+  if (!resp->ch.initFn) {
+    resp->ch.initFn = LOAD_SYMBOL(resp->ch.handle, "nvmlInit");
+  }
+  if (!resp->ch.getCount) {
+    resp->ch.getCount = LOAD_SYMBOL(resp->ch.handle, "nvmlDeviceGetCount");
+  }
+  if (!resp->ch.initFn || !resp->ch.shutdownFn || !resp->ch.getHandle ||
+      !resp->ch.getMemInfo || !resp->ch.getCount) {
+    UNLOAD_LIBRARY(resp->ch.handle);
+    resp->ch.handle = NULL;
+    resp->err = strdup("NVML loaded but required symbols are missing");
+    return;
   }
 
   ret = (*resp->ch.initFn)();

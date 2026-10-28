@@ -22,6 +22,13 @@ EXTRA_MOUNTS=""
 if [ -f /usr/lib/wsl/lib/libnvidia-ml.so.1 ]; then
   EXTRA_MOUNTS="-v /usr/lib/wsl/lib:/usr/lib/wsl/lib:ro"
 fi
+if [ -e /dev/nvidia0 ]; then
+  for dev in /dev/nvidia*; do
+    if [ -e "$dev" ]; then
+      EXTRA_MOUNTS="$EXTRA_MOUNTS --device $dev"
+    fi
+  done
+fi
 
 docker rm -f "$NAME" >/dev/null 2>&1 || true
 

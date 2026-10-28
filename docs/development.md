@@ -127,13 +127,13 @@ CUDA 10.2, GCC, CMake, and Go are used only in the image's build stage. The
 host requires the R470 NVIDIA driver and NVIDIA Container Toolkit, but no CUDA
 Toolkit installation.
 
-If logs show `CUDA not detected` and a missing `libnvidia-ml` path, the
-container did not receive NVIDIA driver libraries. Run
-`./scripts/run_k2100m_docker.sh` (it checks `nvidia-smi` in Docker first) or
-fix NVIDIA Container Toolkit / `--gpus all` before starting Ollama.
+If logs show `CUDA not detected` but **`Using CUDA without NVML`**, the server
+still uses the CUDA backend with the VRAM from `OLLAMA_GPU_MEMORY` (about 1.75
+GiB by default for the K2100M). You should also see **`Nvidia GPU detected`**
+when NVML works, or layer offload lines when running a model.
 
-Check logs for `Nvidia GPU detected` and `cuda` in `Dynamic LLM variants`, then
-try a small model:
+Check logs for `Nvidia GPU detected` or `Using CUDA without NVML`, then try a
+small model:
 
 ```bash
 docker logs -f ollama-k2100m

@@ -48,7 +48,7 @@ FROM llama-native AS build
 
 WORKDIR /src
 RUN mkdir -p /out && go build -a \
-    -ldflags "-X github.com/jmorganca/ollama/version.Version=0.1.18-k2100m" \
+    -ldflags "-X github.com/jmorganca/ollama/version.Version=0.1.18-k2100m.2" \
     -o /out/ollama .
 
 FROM scratch AS artifact
@@ -62,6 +62,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
 COPY --from=build /out/ollama /bin/ollama
 
 ENV OLLAMA_HOST=0.0.0.0
+ENV OLLAMA_GPU=cuda
+ENV OLLAMA_GPU_MEMORY=1879048192
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
