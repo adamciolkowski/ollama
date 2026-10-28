@@ -48,14 +48,16 @@ void cuda_init(cuda_init_resp_t *resp) {
 
   for (i = 0; cuda_lib_paths[i] != NULL && resp->ch.handle == NULL; i++) {
     resp->ch.handle = LOAD_LIBRARY(cuda_lib_paths[i], RTLD_LAZY);
+    if (!resp->ch.handle) {
+      (void)LOAD_ERR();
+    }
   }
   if (!resp->ch.handle) {
-    // TODO improve error message, as the LOAD_ERR will have typically have the
-    // final path that was checked which might be confusing.
     char *msg = LOAD_ERR();
+    const char *last = cuda_lib_paths[i - 1];
     snprintf(buf, buflen,
-             "Unable to load %s library to query for Nvidia GPUs: %s",
-             cuda_lib_paths[0], msg);
+             "Unable to load NVML (libnvidia-ml) after trying %d paths; last=%s: %s",
+             i, last ? last : "none", msg ? msg : "unknown error");
     free(msg);
     resp->err = strdup(buf);
     return;

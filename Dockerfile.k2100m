@@ -1,10 +1,11 @@
 # syntax=docker/dockerfile:1
 
 ARG CUDA_IMAGE=nvcr.io/nvidia/cuda:10.2-devel-ubuntu18.04
+ARG CUDA_RUNTIME_IMAGE=nvcr.io/nvidia/cuda:10.2-base-ubuntu18.04
 ARG CMAKE_VERSION=3.22.1
 ARG GO_VERSION=1.20.14
-ARG OLLAMA_REPO=https://github.com/ollama/ollama.git
-ARG OLLAMA_REF=v0.1.18
+ARG OLLAMA_REPO=https://github.com/adamciolkowski/ollama.git
+ARG OLLAMA_REF=k2100m-cuda10
 
 # Toolchain layers change rarely; keep them before any source checkout.
 FROM --platform=linux/amd64 ${CUDA_IMAGE} AS toolchain
@@ -29,44 +30,38 @@ ENV OLLAMA_CUDA_10_COMPAT=1
 ENV CMAKE_CUDA_ARCHITECTURES=30
 ENV CGO_ENABLED=1
 
-# Upstream Ollama + llama.cpp submodule (invalidates only when OLLAMA_REF/REPO change).
+# Kepler branch from this fork (includes llama.cpp patches and gpu NVML paths).
 FROM toolchain AS ollama-src
 
 ARG OLLAMA_REPO
 ARG OLLAMA_REF
 
 WORKDIR /src
-RUN git clone --branch "${OLLAMA_REF}" "${OLLAMA_REPO}" . && git submodule update --init llm/llama.cpp
+RUN git clone --branch "${OLLAMA_REF}" --depth 1 "${OLLAMA_REPO}" . && git submodule update --init llm/llama.cpp
 
-# Kepler overlay files (invalidates when patches/scripts change, not on every go build).
 FROM ollama-src AS llama-native
-
-COPY llm/generate/gen_common.sh llm/generate/gen_linux.sh llm/generate/
-COPY llm/generate/patches/cuda-10.2.patch llm/generate/patches/
 
 WORKDIR /src/llm/generate
 RUN bash gen_linux.sh
 
-# Go link is fast relative to native builds; keep it in its own layer.
 FROM llama-native AS build
 
-COPY gpu/gpu_info_cuda.c gpu/gpu_info_cuda.c
-
 WORKDIR /src
-RUN mkdir -p /out && go build -o /out/ollama .
+RUN mkdir -p /out && go build -a \
+    -ldflags "-X github.com/jmorganca/ollama/version.Version=0.1.18-k2100m" \
+    -o /out/ollama .
 
 FROM scratch AS artifact
 COPY --from=build /out/ollama /ollama
 
-FROM ubuntu:18.04 AS runtime
+# Same NVIDIA runtime family as the nvidia-smi preflight check (plain ubuntu misses driver libs on WSL).
+FROM --platform=linux/amd64 ${CUDA_RUNTIME_IMAGE} AS runtime
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /out/ollama /bin/ollama
 
 ENV OLLAMA_HOST=0.0.0.0
-ENV PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
