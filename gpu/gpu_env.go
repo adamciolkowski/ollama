@@ -40,8 +40,10 @@ func cudaInfoWithoutNVML() (GpuInfo, bool) {
 	}
 	free, total := vramFromEnv()
 	return GpuInfo{
-		Library:     "cuda",
-		FreeMemory:  free,
-		TotalMemory: total,
+		memInfo: memInfo{
+			FreeMemory:  free,
+			TotalMemory: total,
+		},
+		Library: "cuda",
 	}, true
 }

@@ -48,7 +48,7 @@ FROM llama-native AS build
 
 WORKDIR /src
 RUN mkdir -p /out && go build -a \
-    -ldflags "-X github.com/jmorganca/ollama/version.Version=0.1.18-k2100m.2" \
+    -ldflags "-X github.com/jmorganca/ollama/version.Version=0.1.18-k2100m.3" \
     -o /out/ollama .
 
 FROM scratch AS artifact
