@@ -1,0 +1,33 @@
+Step 33/47 : RUN mkdir -p /out && go build -a     -ldflags "-X github.com/jmorganca/ollama/version.Version=0.1.18-k2100m.2"     -o /out/ollama .
+ ---> Running in 36ca21f7e493
+go: downloading github.com/spf13/cobra v1.7.0
+go: downloading github.com/olekukonko/tablewriter v0.0.5
+go: downloading golang.org/x/crypto v0.14.0
+go: downloading golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
+go: downloading golang.org/x/term v0.13.0
+go: downloading github.com/emirpasic/gods v1.18.1
+go: downloading github.com/gin-contrib/cors v1.4.0
+go: downloading github.com/gin-gonic/gin v1.9.1
+go: downloading golang.org/x/sync v0.3.0
+go: downloading github.com/mattn/go-runewidth v0.0.14
+go: downloading github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
+go: downloading github.com/spf13/pflag v1.0.5
+go: downloading github.com/gin-contrib/sse v0.1.0
+go: downloading github.com/mattn/go-isatty v0.0.19
+go: downloading golang.org/x/net v0.17.0
+go: downloading golang.org/x/sys v0.13.0
+go: downloading github.com/go-playground/validator/v10 v10.14.0
+go: downloading github.com/pelletier/go-toml/v2 v2.0.8
+go: downloading github.com/ugorji/go/codec v1.2.11
+go: downloading google.golang.org/protobuf v1.30.0
+go: downloading gopkg.in/yaml.v3 v3.0.1
+go: downloading github.com/rivo/uniseg v0.2.0
+go: downloading github.com/gabriel-vasile/mimetype v1.4.2
+go: downloading github.com/go-playground/universal-translator v0.18.1
+go: downloading github.com/leodido/go-urn v1.2.4
+go: downloading golang.org/x/text v0.13.0
+go: downloading github.com/go-playground/locales v0.14.1
+# github.com/jmorganca/ollama/gpu
+gpu/gpu_env.go:44:3: unknown field FreeMemory in struct literal of type GpuInfo
+gpu/gpu_env.go:45:3: unknown field TotalMemory in struct literal of type GpuInfo
+The command '/bin/sh -c mkdir -p /out && go build -a     -ldflags "-X github.com/jmorganca/ollama/version.Version=0.1.18-k2100m.2"     -o /out/ollama .' returned a non-zero code: 1
