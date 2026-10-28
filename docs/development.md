@@ -88,9 +88,9 @@ Toolkit on the Linux host, then verify that the GPU is visible in a container:
 docker run --rm --gpus all nvcr.io/nvidia/cuda:10.2-base-ubuntu18.04 nvidia-smi
 ```
 
-Build the runtime image from this repository. The Dockerfile clones
-Ollama `v0.1.18` and `llama.cpp` from GitHub, then overlays the Kepler
-CUDA 10.2 patches from this tree:
+Build the runtime image. The Dockerfile clones this fork's `k2100m-cuda10`
+branch (Kepler patches and NVML fixes included) and uses the CUDA 10.2 runtime
+base image so driver libraries match the `nvidia-smi` preflight check:
 
 ```bash
 docker build --platform linux/amd64 \
@@ -98,6 +98,10 @@ docker build --platform linux/amd64 \
   -f Dockerfile.k2100m \
   -t ollama-k2100m .
 ```
+
+After starting the container, confirm the log shows **`version 0.1.18-k2100m`**
+(not `0.0.0`). If it still says `0.0.0`, the image was not rebuilt from the
+current branch.
 
 Run it with GPU access and persistent model storage. The `-v` flag is required;
 the image name `ollama-k2100m` must be last. Putting `ollama-k2100m:/root/.ollama`
